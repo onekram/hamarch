@@ -1,0 +1,52 @@
+#pragma once
+
+#include <vector>
+#include <string>
+#include <cinttypes>
+#include <bitset>
+#include <fstream>
+#include <cstring>
+#include <algorithm>
+#include <cmath>
+#include <iostream>
+
+
+template <size_t I, size_t O>
+class ArchiveWriter {
+public:
+    explicit ArchiveWriter(const std::string& filename, bool is_new = false);
+
+    void AddFile(const std::string& path);
+
+    void Close();
+
+private:
+    static const uint8_t kFileNameBytes = 30;
+    static const uint8_t kFileSizeBytes = 8;
+
+    std::bitset<I> last_block_{};
+    uint8_t block_index_{};
+
+    char last_char_{};
+    uint8_t char_index_{};
+
+    std::ofstream out_{};
+
+    [[nodiscard]] static bool IsPowerOfTwo(uint32_t num);
+
+    [[nodiscard]] static uint64_t Convert(uint64_t size);
+
+    void Update();
+
+    static std::bitset<O> Coding(const std::bitset<I>& bits);
+
+    void Write(char data);
+
+    void UpdateBlock();
+
+    void WriteChar(const std::bitset<O>& bs);
+
+    void PrintChar(char data);
+
+    void UpdateChar();
+};
