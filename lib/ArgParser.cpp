@@ -35,7 +35,7 @@ bool ArgParser::IsNumeric(const std::string_view& str) {
     return std::ranges::all_of(str.begin(), str.end(), isdigit);
 }
 
-void ArgParser::    FlagProcessing(const std::string_view& str) {
+void ArgParser::FlagProcessing(const std::string_view& str) {
     if (str[0] == '-' && str[1] == '-') {
         std::string_view param = str.substr(2);
         if (param == help_.name)

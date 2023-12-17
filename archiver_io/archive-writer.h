@@ -18,9 +18,12 @@ public:
 
     void AddFile(const std::string& path);
 
+    void AddArchive(const std::string& path);
+
     void Close();
 
 private:
+
     static const uint8_t kFileNameBytes = 30;
     static const uint8_t kFileSizeBytes = 8;
 
@@ -34,19 +37,14 @@ private:
 
     [[nodiscard]] static bool IsPowerOfTwo(uint32_t num);
 
-    [[nodiscard]] static uint64_t Convert(uint64_t size);
-
-    void Update();
 
     static std::bitset<O> Coding(const std::bitset<I>& bits);
 
+    void Update();
     void Write(char data);
-
     void UpdateBlock();
-
     void WriteChar(const std::bitset<O>& bs);
-
-    void PrintChar(char data);
-
     void UpdateChar();
+
+    void PutData(std::ifstream& in);
 };

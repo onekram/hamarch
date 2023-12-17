@@ -1,42 +1,45 @@
 #include "archive-writer.h"
 
+
 template <size_t I, size_t O>
 ArchiveWriter<I, O>::ArchiveWriter(const std::string& filename, bool is_new) {
     if (is_new) {
         this->out_ = std::ofstream(filename, std::ios::binary | std::ios::out | std::ios::trunc);
-        if (!out_.is_open()) {
-            std::cerr << "Error: file no found " + filename + '\n';
-            exit(EXIT_FAILURE);
-        }
-        uint8_t data_size = strlen(filename.c_str());
-        for (int8_t i = 0; i < kFileNameBytes; ++i) {
-            if (i < data_size)
-                Write(filename[i]);
-            else
-                Write(0);
-        }
-        Update();
     } else {
-        this->out_ = std::ofstream(filename, std::ios::binary | std::ios::ate);
-        if (!out_.is_open()) {
-            std::cerr << "Error: file no found " + filename + '\n';
-            exit(EXIT_FAILURE);
-        }
+        this->out_ = std::ofstream(filename, std::ios::binary | std::ios::out | std::ios::app);
     }
+}
+
+template<size_t I, size_t O>
+void ArchiveWriter<I, O>::PutData(std::ifstream& in) {
+    char c;
+    while (in.get(c)) {
+        out_ << c;
+    }
+}
+
+template<size_t I, size_t O>
+void ArchiveWriter<I, O>::AddArchive(const std::string& path) {
+    std::ifstream in = std::ifstream(path, std::ios::binary);
+    if (!in.is_open()) {
+        std::cerr << "Error: file no found " + path + '\n';
+        exit(EXIT_FAILURE);
+    }
+    PutData(in);
 }
 
 
 template <size_t I, size_t O>
 void ArchiveWriter<I, O>::AddFile(const std::string& path) {
-    uint64_t file_size = Convert(std::ifstream(path, std::ios::ate).tellg());
+    uint64_t file_size = std::ifstream(path, std::ios::ate).tellg();
     std::ifstream in = std::ifstream(path, std::ios::binary);
     if (!in.is_open()) {
         std::cerr << "Error: file no found " + path + '\n';
         exit(EXIT_FAILURE);
     }
 
-    uint8_t data_size = strlen(path.c_str());
-    for (int8_t i = 0; i < kFileNameBytes; ++i) {
+    size_t data_size = strlen(path.c_str());
+    for (size_t i = 0; i < kFileNameBytes; ++i) {
         if (i < data_size)
             Write(path[i]);
         else
@@ -56,7 +59,6 @@ void ArchiveWriter<I, O>::AddFile(const std::string& path) {
     Update();
 }
 
-
 template<size_t I, size_t O>
 bool ArchiveWriter<I, O>::IsPowerOfTwo(uint32_t num) {
     return ((num - 1) & num) == 0;
@@ -65,11 +67,6 @@ bool ArchiveWriter<I, O>::IsPowerOfTwo(uint32_t num) {
 template<size_t I, size_t O>
 void ArchiveWriter<I, O>::Close() {
     out_.close();
-}
-
-template<size_t I, size_t O>
-uint64_t ArchiveWriter<I, O>::Convert(uint64_t size) {
-    return std::ceil((std::ceil(((double)size * 8.0) / I) * O) / 8.0);
 }
 
 template<size_t I, size_t O>
@@ -91,7 +88,7 @@ std::bitset<O> ArchiveWriter<I, O>::Coding(const std::bitset<I>& bits) {
     }
 
     std::string str = res.to_string();
-    for (int i = 0; i < res.size(); i++) {
+    for (int i = 0; i < res.size() - 1; i++) {
         index = i + 1;
         if (IsPowerOfTwo(index)) continue;
         int mask = 1;
@@ -103,6 +100,11 @@ std::bitset<O> ArchiveWriter<I, O>::Coding(const std::bitset<I>& bits) {
             mask <<= 1;
         }
     }
+    for (int i = 0; i < res.size() - 1; i++) {
+        if (res[i])
+            res.flip(res.size() - 1);
+    }
+
     return res;
 }
 
@@ -129,7 +131,7 @@ void ArchiveWriter<I, O>::UpdateBlock() {
 
 template<size_t I, size_t O>
 void ArchiveWriter<I, O>::WriteChar(const std::bitset<O>& bs) {
-    for (uint8_t i = 0; i < bs.size(); ++i) {
+    for (size_t i = 0; i < bs.size(); ++i) {
         if (bs[i]) {
             last_char_ |= (1 << char_index_);
         }
@@ -141,22 +143,13 @@ void ArchiveWriter<I, O>::WriteChar(const std::bitset<O>& bs) {
 }
 
 template<size_t I, size_t O>
-void ArchiveWriter<I, O>::PrintChar(char data) {
-    uint8_t mask = 1 << 7;
-    for (uint8_t i = 0; i < 8; ++i) {
-        std::cout << ((data & mask) != 0);
-        mask >>= 1;
-    }
-    std::cout << std::endl;
-}
-
-template<size_t I, size_t O>
 void ArchiveWriter<I, O>::UpdateChar() {
     out_ << last_char_;
     last_char_ = 0;
     char_index_ = 0;
 }
 
-template class ArchiveWriter<11, 15>;
-template class ArchiveWriter<26, 31>;
 
+template class ArchiveWriter<11, 16>;
+template class ArchiveWriter<26, 32>;
+template class ArchiveWriter<57, 64>;

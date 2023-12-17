@@ -1,12 +1,13 @@
 
 #include <sstream>
+#include <set>
 #include "archive-reader.h"
 
 
 static const int kByteBits = 8;
 
 template <size_t I, size_t O>
-ArchiveReader<I, O>::ArchiveReader(const std::string& filename) {
+ArchiveReader<I, O>::ArchiveReader(const std::string& filename) : filename_(filename){
     this->in_ = std::ifstream(filename, std::ios::binary | std::ios::in);
     if (!in_.is_open()) {
         std::cerr << "Error: file no found " + filename + '\n';
@@ -16,13 +17,10 @@ ArchiveReader<I, O>::ArchiveReader(const std::string& filename) {
 
 template <size_t I, size_t O>
 std::string ArchiveReader<I, O>::GetName() {
-//    std::cout << "------name-------" << std::endl;
-
     std::stringstream ss;
     char c;
     for (size_t i = 0; i < kFileNameBytes; ++i) {
         c = Read();
-//        std::cout << (i + 1) << ") " <<  GetValFromChar(c) << " - " << PrintChar(c) << " - " << c << std::endl;
         if (c)
             ss << c;
     }
@@ -32,40 +30,102 @@ std::string ArchiveReader<I, O>::GetName() {
 
 template <size_t I, size_t O>
 uint64_t ArchiveReader<I, O>::GetSize() {
-//    std::cout << "------size-------" << std::endl;
     unsigned char data[kFileSizeBytes];
-    size_t index = 1;
     for (unsigned char& c : data) {
         c = Read();
-//        std::cout << index++  << ") " <<  GetValFromChar(c) << " - " << PrintChar(c) << " - " << c << std::endl;
     }
     Update();
     return GetSizeFromChar(data);
 }
 
 template <size_t I, size_t O>
-void ArchiveReader<I, O>::GetData() {
-    char c;
-    for (size_t i = 0; i < 24; ++i) {
-        c = Read();
-//        std::cout << (i + 1)  << ") " <<  GetValFromChar(c) << " - " << PrintChar(c) << " - " << c << std::endl;
-    }
-    Update();
-}
-
-
-template <size_t I, size_t O>
 std::vector<std::string> ArchiveReader<I, O>::GetArchiveList() {
     std::vector<std::string> res;
-    uint64_t shift = Convert(kFileNameBytes);
-    in_.seekg(shift);
+    in_.seekg(0);
     char c;
     while (in_.get(c)) {
         in_.seekg(-1, std::ios::cur);
         res.push_back(GetName());
-        in_.seekg(GetSize(), std::ios::cur);
+        in_.seekg(Convert(GetSize()), std::ios::cur);
     }
     return res;
+}
+
+template <size_t I, size_t O>
+void ArchiveReader<I, O>::ExtractFiles() {
+    std::string cur_name;
+    in_.seekg(0);
+    std::ofstream out;
+    char c;
+    while (in_.get(c)) {
+        in_.seekg(-1, std::ios::cur);
+        cur_name = GetName();
+        out = std::ofstream(cur_name, std::ios::binary | std::ios::out | std::ios::trunc);
+        size_t end = GetSize();
+        for (size_t i = 0; i < end; ++i) {
+            out << Read();
+        }
+        Update();
+    }
+}
+
+template <size_t I, size_t O>
+void ArchiveReader<I, O>::ExtractFiles(const std::vector<std::string>& filenames) {
+    std::set<std::string> filenames_set{filenames.begin(), filenames.end()};
+    std::string cur_name;
+    in_.seekg(0);
+    std::ofstream out;
+    char c;
+    while (in_.get(c)) {
+        in_.seekg(-1, std::ios::cur);
+        cur_name = GetName();
+        if (filenames_set.contains(cur_name)) {
+            out = std::ofstream(cur_name, std::ios::binary | std::ios::out | std::ios::trunc);
+            size_t end = GetSize();
+            for (size_t i = 0; i < end; ++i) {
+                out << Read();
+            }
+            Update();
+        } else {
+            in_.seekg(Convert(GetSize()), std::ios::cur);
+        }
+    }
+}
+
+template<size_t I, size_t O>
+void ArchiveReader<I, O>::PutData(std::ifstream& in, std::fstream& out) {
+    char c;
+    while (in.get(c)) {
+        out << c;
+    }
+}
+
+template <size_t I, size_t O>
+void ArchiveReader<I, O>::DeleteFiles(const std::vector<std::string>& filenames) {
+    std::set<std::string> filenames_set{filenames.begin(), filenames.end()};
+    std::string cur_name;
+    in_.seekg(0);
+    std::ofstream out(kTemporaryName, std::ios::binary | std::ios::out | std::ios::trunc);
+    char c;
+    int16_t shift = Convert(kFileNameBytes) + Convert(kFileSizeBytes);
+    while (in_.get(c)) {
+        in_.seekg(-1, std::ios::cur);
+        cur_name = GetName();
+        if (!filenames_set.contains(cur_name)) {
+            size_t end = Convert(GetSize());
+            in_.seekg(-shift, std::ios::cur);
+            for (size_t i = 0; i < shift + end; ++i) {
+                in_.get(c);
+                out << c;
+            }
+            Update();
+        } else {
+            in_.seekg(Convert(GetSize()), std::ios::cur);
+        }
+    }
+    out.close();
+    std::remove(filename_.c_str());
+    std::rename(kTemporaryName.c_str(), filename_.c_str());
 }
 
 template <size_t I, size_t O>
@@ -75,22 +135,6 @@ uint64_t ArchiveReader<I, O>::GetSizeFromChar(const unsigned char* data) {
         res += (static_cast<uint64_t>(data[i]) << (i * 8));
     }
     return res;
-}
-
-template <size_t I, size_t O>
-std::string ArchiveReader<I, O>::PrintChar(char data) {
-    std::stringstream ss;
-    uint8_t mask = 1 << 7;
-    for (uint8_t i = 0; i < kByteBits; ++i) {
-        ss << ((data & mask) != 0);
-        mask >>= 1;
-    }
-    return ss.str();
-}
-
-template <size_t I, size_t O>
-uint64_t ArchiveReader<I, O>::GetValFromChar(unsigned char data) {
-    return static_cast<uint64_t>(data);
 }
 
 template <size_t I, size_t O>
@@ -107,10 +151,12 @@ template <size_t I, size_t O>
 std::bitset<I> ArchiveReader<I, O>::Decoding(std::bitset<O>& bits) {
     std::bitset<I> res;
     uint32_t error_index = 0;
+    uint8_t general_bit = 0;
     size_t index;
-    for (size_t i = 0; i < bits.size(); ++i) {
+    for (size_t i = 0; i < bits.size() - 1; ++i) {
         index = i + 1;
         if (!bits[i]) continue;
+        general_bit ^= 1;
         int mask = 1;
         while (mask <= index) {
             if ((mask & index) != 0) {
@@ -119,9 +165,13 @@ std::bitset<I> ArchiveReader<I, O>::Decoding(std::bitset<O>& bits) {
             mask <<= 1;
         }
     }
+    if (general_bit == 0 && error_index != 0) {
+        std::cerr << "Broken data detected!" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     index = 0;
-    for (int i = 0; i < bits.size(); ++i) {
+    for (int i = 0; i < bits.size() - 1; ++i) {
         if (IsPowerOfTwo(i + 1)) continue;
         res[index++] = (i != error_index - 1) == bits[i];
     }
@@ -208,6 +258,8 @@ void ArchiveReader<I, O>::Close() {
     in_.close();
 }
 
-template class ArchiveReader<11, 15>;
-template class ArchiveReader<26, 31>;
+template class ArchiveReader<11, 16>;
+template class ArchiveReader<26, 32>;
+template class ArchiveReader<57, 64>;
+
 

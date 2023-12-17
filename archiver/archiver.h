@@ -19,17 +19,13 @@ struct Options {
     int block_size{};
 
     Options() = default;
-
     Options(const Options& other) = default;
-
 };
 
 class Archiver {
 public:
     explicit Archiver(const Options& opt);
-
     void Execute();
-
     void CheckCorrectOpt();
 private:
     Options opt_;
