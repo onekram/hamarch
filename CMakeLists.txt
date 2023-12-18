@@ -14,4 +14,6 @@ add_subdirectory(lib)
 add_subdirectory(bin)
 add_subdirectory(archiver)
 add_subdirectory(archiver_io)
+enable_testing()
+add_subdirectory(tests)
 

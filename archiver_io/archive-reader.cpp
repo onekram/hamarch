@@ -41,13 +41,15 @@ uint64_t ArchiveReader<I, O>::GetSize() {
 template <size_t I, size_t O>
 std::vector<std::string> ArchiveReader<I, O>::GetArchiveList() {
     std::vector<std::string> res;
-    in_.seekg(0);
+    in_.seekg(0, std::ios::beg);
     char c;
     while (in_.get(c)) {
         in_.seekg(-1, std::ios::cur);
         res.push_back(GetName());
         in_.seekg(Convert(GetSize()), std::ios::cur);
     }
+    in_.clear();
+
     return res;
 }
 
@@ -67,6 +69,7 @@ void ArchiveReader<I, O>::ExtractFiles() {
         }
         Update();
     }
+    in_.clear();
 }
 
 template <size_t I, size_t O>
@@ -126,6 +129,7 @@ void ArchiveReader<I, O>::DeleteFiles(const std::vector<std::string>& filenames)
     out.close();
     std::remove(filename_.c_str());
     std::rename(kTemporaryName.c_str(), filename_.c_str());
+    in_ = std::ifstream(filename_, std::ios::binary | std::ios::in);;
 }
 
 template <size_t I, size_t O>

@@ -29,7 +29,7 @@ void Archiver::CheckCorrectOpt() {
     }
 
     if (!opt_.extract && !opt_.list && opt_.filenames.empty()) {
-        std::cerr << "Error: Pass used files" << std::endl;;
+        std::cerr << "Error: Pass used kFiles" << std::endl;;
         exit(EXIT_FAILURE);
     }
 }

@@ -1,7 +1,7 @@
 # Prerequisites
 *.d
 
-# Compiled Object files
+# Compiled Object kFiles
 *.slo
 *.lo
 *.o
@@ -16,7 +16,7 @@
 *.dylib
 *.dll
 
-# Fortran module files
+# Fortran module kFiles
 *.mod
 *.smod
 
@@ -35,11 +35,11 @@
 # ArchiveWriter
 *.haf
 
-# Data files
+# Data kFiles
 /data/
 
-# Cnake files
+# Cnake kFiles
 /cmake-build-debug/
 
 .idea/
-/d/
+/src/
