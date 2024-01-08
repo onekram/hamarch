@@ -22,6 +22,8 @@ public:
 
     void Close();
 
+    static std::bitset<O> Coding(const std::bitset<I>& bits);
+
 private:
 
     static const uint8_t kFileNameBytes = 30;
@@ -38,7 +40,6 @@ private:
     [[nodiscard]] static bool IsPowerOfTwo(uint32_t num);
 
 
-    static std::bitset<O> Coding(const std::bitset<I>& bits);
 
     void Update();
     void Write(char data);

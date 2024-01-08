@@ -169,6 +169,7 @@ std::bitset<I> ArchiveReader<I, O>::Decoding(std::bitset<O>& bits) {
             mask <<= 1;
         }
     }
+    general_bit ^= bits[bits.size() - 1];
     if (general_bit == 0 && error_index != 0) {
         std::cerr << "Broken data detected!" << std::endl;
         exit(EXIT_FAILURE);

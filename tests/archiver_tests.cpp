@@ -14,12 +14,14 @@ const std::string kThirdArchiveName{"archive3.haf32"};
 const std::string kPathFromDirectory{"/home/onekram/CLionProjects/labwork6-onekram/src/"};
 const std::string kPathToDirectory{"/home/onekram/CLionProjects/labwork6-onekram/data/"};
 
-const std::string kFirstPNGFileName{"1.png"};
-const std::string kSecondPNGFileName{"2.png"};
+const std::string kFirstPicFileName{"1.jpg"};
+const std::string kSecondPicFileName{"2.jpg"};
 const std::string kFirstTXTFileName{"1.txt"};
 const std::string kSecondTXTFileName{"2.txt"};
+const std::string kFirstVideoFileName{"1.mp4"};
 
-const std::vector<std::string> kFiles{kFirstPNGFileName, kSecondPNGFileName, kFirstTXTFileName, kSecondTXTFileName};
+
+const std::vector<std::string> kFiles{kFirstPicFileName, kSecondPicFileName, kFirstTXTFileName, kSecondTXTFileName, kFirstVideoFileName};
 const std::vector<std::string> kArchives{kFirstArchiveName, kSecondArchiveName, kThirdArchiveName};
 
 namespace fs = std::filesystem;
@@ -69,8 +71,8 @@ bool CompareData(const std::string& filename) {
 
 TEST_F(TestArchive, AdditionTest) {
     ArchiveWriter<26, 32> arc_writer(kFirstArchiveName, true);
-    arc_writer.AddFile(kFirstPNGFileName);
-    arc_writer.AddFile(kSecondPNGFileName);
+    arc_writer.AddFile(kFirstPicFileName);
+    arc_writer.AddFile(kSecondPicFileName);
     arc_writer.Close();
 
     ArchiveReader<26, 32> arc_reader(kFirstArchiveName);
@@ -78,34 +80,35 @@ TEST_F(TestArchive, AdditionTest) {
     arc_reader.Close();
 
     ASSERT_EQ(list.size(), 2);
-    ASSERT_EQ(list[0], kFirstPNGFileName);
-    ASSERT_EQ(list[1], kSecondPNGFileName);
+    ASSERT_EQ(list[0], kFirstPicFileName);
+    ASSERT_EQ(list[1], kSecondPicFileName);
 }
 
 TEST_F(TestArchive, DeletionTest) {
     ArchiveWriter<26, 32> arc_writer(kFirstArchiveName, true);
-    arc_writer.AddFile(kFirstPNGFileName);
-    arc_writer.AddFile(kSecondPNGFileName);
+    arc_writer.AddFile(kFirstPicFileName);
+    arc_writer.AddFile(kSecondPicFileName);
     arc_writer.Close();
 
     ArchiveReader<26, 32> arc_reader(kFirstArchiveName);
-    arc_reader.DeleteFiles({kFirstPNGFileName});
+    arc_reader.DeleteFiles({kFirstPicFileName});
     std::vector<std::string> list = arc_reader.GetArchiveList();
     arc_reader.Close();
 
     ASSERT_EQ(list.size(), 1);
-    ASSERT_EQ(list[0], kSecondPNGFileName);
+    ASSERT_EQ(list[0], kSecondPicFileName);
 }
 
 TEST_F(TestArchive, ConcatenationTest) {
     ArchiveWriter<26, 32> arc_writer1(kFirstArchiveName, true);
-    arc_writer1.AddFile(kFirstPNGFileName);
-    arc_writer1.AddFile(kSecondPNGFileName);
+    arc_writer1.AddFile(kFirstPicFileName);
+    arc_writer1.AddFile(kSecondPicFileName);
     arc_writer1.Close();
 
     ArchiveWriter<26, 32> arc_writer2(kSecondArchiveName, true);
     arc_writer2.AddFile(kFirstTXTFileName);
     arc_writer2.AddFile(kSecondTXTFileName);
+    arc_writer2.AddFile(kFirstVideoFileName);
     arc_writer2.Close();
 
     ArchiveWriter<26, 32> arc_writer3(kThirdArchiveName, true);
@@ -117,11 +120,12 @@ TEST_F(TestArchive, ConcatenationTest) {
     std::vector<std::string> list = arc_reader.GetArchiveList();
     arc_reader.Close();
 
-    ASSERT_EQ(list.size(), 4);
-    ASSERT_EQ(list[0], kFirstPNGFileName);
-    ASSERT_EQ(list[1], kSecondPNGFileName);
+    ASSERT_EQ(list.size(), 5);
+    ASSERT_EQ(list[0], kFirstPicFileName);
+    ASSERT_EQ(list[1], kSecondPicFileName);
     ASSERT_EQ(list[2], kFirstTXTFileName);
     ASSERT_EQ(list[3], kSecondTXTFileName);
+    ASSERT_EQ(list[4], kFirstVideoFileName);
 }
 
 TEST_F(TestArchive, ExtractionAllTest) {
@@ -151,7 +155,7 @@ TEST_F(TestArchive, ExtractionTest) {
 
     RemoveFiles();
 
-    std::vector<std::string> extract_files{kFirstPNGFileName, kFirstTXTFileName};
+    std::vector<std::string> extract_files{kFirstPicFileName, kFirstTXTFileName};
     ArchiveReader<26, 32> arc_reader(kFirstArchiveName);
     arc_reader.ExtractFiles(extract_files);
     arc_reader.Close();
@@ -163,8 +167,8 @@ TEST_F(TestArchive, ExtractionTest) {
 
 TEST_F(TestArchive, ComboTest) {
     ArchiveWriter<26, 32> arc_writer1(kFirstArchiveName, true);
-    arc_writer1.AddFile(kFirstPNGFileName);
-    arc_writer1.AddFile(kSecondPNGFileName);
+    arc_writer1.AddFile(kFirstPicFileName);
+    arc_writer1.AddFile(kSecondPicFileName);
     arc_writer1.Close();
 
     ArchiveWriter<26, 32> arc_writer2(kSecondArchiveName, true);
@@ -180,20 +184,20 @@ TEST_F(TestArchive, ComboTest) {
     arc_writer3.Close();
 
     ArchiveReader<26, 32> arc_reader3(kThirdArchiveName);
-    arc_reader3.DeleteFiles({kFirstPNGFileName, kFirstTXTFileName});
+    arc_reader3.DeleteFiles({kFirstPicFileName, kFirstTXTFileName});
     std::vector<std::string> list3 = arc_reader3.GetArchiveList();
     arc_reader3.Close();
 
     ASSERT_EQ(list3.size(), 2);
-    ASSERT_EQ(list3[0], kSecondPNGFileName);
+    ASSERT_EQ(list3[0], kSecondPicFileName);
     ASSERT_EQ(list3[1], kSecondTXTFileName);
 
     ArchiveReader<26, 32> arc_reader1(kFirstArchiveName);
-    arc_reader1.DeleteFiles({kSecondPNGFileName});
+    arc_reader1.DeleteFiles({kSecondPicFileName});
     arc_reader1.ExtractFiles();
     arc_reader1.Close();
 
-    ASSERT_TRUE(CompareData(kFirstPNGFileName));
+    ASSERT_TRUE(CompareData(kFirstPicFileName));
 
     ArchiveReader<26, 32> arc_reader2(kSecondArchiveName);
     arc_reader2.DeleteFiles({kSecondTXTFileName});
@@ -203,7 +207,7 @@ TEST_F(TestArchive, ComboTest) {
     ASSERT_TRUE(CompareData(kFirstTXTFileName));
 
     ArchiveWriter<26, 32> arc_writer_app(kThirdArchiveName);
-    arc_writer_app.AddFile(kFirstPNGFileName);
+    arc_writer_app.AddFile(kFirstPicFileName);
     arc_writer_app.AddFile(kFirstTXTFileName);
     arc_writer_app.Close();
 
@@ -212,8 +216,8 @@ TEST_F(TestArchive, ComboTest) {
     arc_reader_app.Close();
 
     ASSERT_EQ(list_app.size(), 4);
-    ASSERT_EQ(list_app[0], kSecondPNGFileName);
+    ASSERT_EQ(list_app[0], kSecondPicFileName);
     ASSERT_EQ(list_app[1], kSecondTXTFileName);
-    ASSERT_EQ(list_app[2], kFirstPNGFileName);
+    ASSERT_EQ(list_app[2], kFirstPicFileName);
     ASSERT_EQ(list_app[3], kFirstTXTFileName);
 }

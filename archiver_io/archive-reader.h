@@ -24,6 +24,8 @@ public:
     void DeleteFiles(const std::vector<std::string>& filenames);
 
     void Close();
+    static std::bitset<I> Decoding(std::bitset<O>& bits);
+
 private:
     const size_t kFileNameBytes = 30;
     const size_t kFileSizeBytes = 8;
@@ -47,7 +49,6 @@ private:
 
     [[nodiscard]] static bool IsPowerOfTwo(uint32_t num);
     [[nodiscard]] static uint64_t Convert(uint64_t size);
-    std::bitset<I> Decoding(std::bitset<O>& bits);
 
     char Read();
     char UpdateBlock();
