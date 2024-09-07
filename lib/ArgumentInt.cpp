@@ -28,6 +28,7 @@ ArgumentInt& ArgumentInt::Default(int value) {
 
 ArgumentInt& ArgumentInt::Positional() {
     positional = true;
+    return *this;
 }
 
 void ArgumentInt::SetValue(int value) {
@@ -74,4 +75,5 @@ std::string ArgumentInt::GetInfo() {
 ArgumentInt& ArgumentInt::MultiValue(int min) {
     multi_value = true;
     min_amount = min;
+    return *this;
 }

@@ -31,6 +31,7 @@ ArgumentString& ArgumentString::Default(const char* valueCh) {
 
 ArgumentString& ArgumentString::Positional() {
     positional = true;
+    return *this;
 }
 
 void ArgumentString::SetValue(const std::string& value) {
@@ -76,4 +77,5 @@ std::string ArgumentString::GetInfo() {
 ArgumentString& ArgumentString::MultiValue(int min) {
     multi_value = true;
     min_amount = min;
+    return *this;
 }
