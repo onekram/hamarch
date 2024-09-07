@@ -15,3 +15,7 @@ add_executable(archiver_tests archiver_tests.cpp ${ARCHIVER_IO_SRC})
 
 target_include_directories(archiver_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/archiver_io)
 target_link_libraries(archiver_tests PRIVATE GTest::gtest_main)
+
+include(GoogleTest)
+
+gtest_discover_tests(archiver_tests)
