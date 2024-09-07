@@ -11,7 +11,7 @@ const std::string kFirstArchiveName{"archive1.haf32"};
 const std::string kSecondArchiveName{"archive2.haf32"};
 const std::string kThirdArchiveName{"archive3.haf32"};
 
-const std::string kPathFromDirectory = PATH"/src/";
+const std::string kPathFromDirectory = PATH"/assets/";
 
 const std::string kFirstPicFileName{"1.jpg"};
 const std::string kSecondPicFileName{"2.jpg"};
