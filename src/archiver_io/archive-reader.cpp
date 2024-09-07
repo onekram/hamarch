@@ -28,7 +28,7 @@ template <size_t I, size_t O> std::string ArchiveReader<I, O>::GetName() {
 
 template <size_t I, size_t O> uint64_t ArchiveReader<I, O>::GetSize() {
   unsigned char data[kFileSizeBytes];
-  for (unsigned char &c : data) {
+  for (auto& c : data) {
     c = Read();
   }
   Update();
