@@ -11,10 +11,7 @@ const std::string kFirstArchiveName{"archive1.haf32"};
 const std::string kSecondArchiveName{"archive2.haf32"};
 const std::string kThirdArchiveName{"archive3.haf32"};
 
-const std::string kPathFromDirectory{
-    "/home/onekram/CLionProjects/labwork6-onekram/src/"};
-const std::string kPathToDirectory{
-    "/home/onekram/CLionProjects/labwork6-onekram/data/"};
+const std::string kPathFromDirectory{"src/"};
 
 const std::string kFirstPicFileName{"1.jpg"};
 const std::string kSecondPicFileName{"2.jpg"};
@@ -36,16 +33,16 @@ class TestArchive : public ::testing::Test {
 protected:
   void SetUp() override {
     for (const std::string &file : kFiles) {
-      if (!fs::exists(kPathToDirectory + file)) {
-        fs::copy_file(kPathFromDirectory + file, kPathToDirectory + file);
+      if (!fs::exists(file)) {
+        fs::copy_file(kPathFromDirectory + file, file);
       }
     }
   }
   void TearDown() override {
     RemoveFiles();
     for (const std::string &archive : kArchives) {
-      if (fs::exists(kPathToDirectory + archive)) {
-        fs::remove(kPathToDirectory + archive);
+      if (fs::exists(archive)) {
+        fs::remove(archive);
       }
     }
   }
@@ -53,14 +50,14 @@ protected:
 
 void RemoveFiles() {
   for (const std::string &file : kFiles) {
-    if (fs::exists(kPathToDirectory + file)) {
-      fs::remove(kPathToDirectory + file);
+    if (fs::exists(file)) {
+      fs::remove(file);
     }
   }
 }
 
 bool CompareData(const std::string &filename) {
-  std::ifstream file1(kPathToDirectory + filename, std::ios::binary);
+  std::ifstream file1(filename, std::ios::binary);
   std::ifstream file2(kPathFromDirectory + filename, std::ios::binary);
 
   char c;
@@ -146,7 +143,7 @@ TEST_F(TestArchive, ExtractionAllTest) {
   arc_reader.ExtractFiles();
   arc_reader.Close();
   for (const auto &file : kFiles) {
-    ASSERT_TRUE(fs::exists(kPathToDirectory + file));
+    ASSERT_TRUE(fs::exists(file));
     ASSERT_TRUE(CompareData(file));
   }
 }
@@ -165,7 +162,7 @@ TEST_F(TestArchive, ExtractionTest) {
   arc_reader.ExtractFiles(extract_files);
   arc_reader.Close();
   for (const auto &file : extract_files) {
-    ASSERT_TRUE(fs::exists(kPathToDirectory + file));
+    ASSERT_TRUE(fs::exists(file));
     ASSERT_TRUE(CompareData(file));
   }
 }

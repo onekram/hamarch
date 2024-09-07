@@ -55,9 +55,6 @@ jobs:
     - name: Build
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-    - name: Chore
-      run: mkdir data
-
     - name: Test
-      working-directory: ${{ github.workspace }}/data
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: ctest --build-config ${{ matrix.build_type }}
