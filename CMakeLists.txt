@@ -9,6 +9,7 @@ project(
 
 set(CMAKE_CXX_STANDARD 20)
 
+add_definitions(-DPATH="${CMAKE_SOURCE_DIR}")
 
 add_subdirectory(lib)
 add_subdirectory(bin)
