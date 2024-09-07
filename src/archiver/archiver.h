@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "../archiver_io/archive-reader.h"
-#include "../archiver_io/archive-writer.h"
+#include "archive-reader.h"
+#include "archive-writer.h"
 
 struct Options {
   bool create{};

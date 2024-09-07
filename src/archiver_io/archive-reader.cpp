@@ -1,4 +1,3 @@
-
 #include "archive-reader.h"
 #include <set>
 #include <sstream>

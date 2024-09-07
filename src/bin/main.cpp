@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "lib/ArgParser.h"
+#include "ArgParser.h"
 
-#include "archiver/archiver.h"
+#include "archiver.h"
 
 int main(int argc, char **argv) {
   Options opt;
