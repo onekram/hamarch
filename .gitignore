@@ -41,4 +41,5 @@
 # Cnake kFiles
 /cmake-build-debug/
 
+# IDEA Files
 .idea/
